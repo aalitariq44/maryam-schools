@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:maryams_school_fees/app.dart';
 import 'package:maryams_school_fees/data.dart';
 import 'package:maryams_school_fees/student_acceptance.dart';
+import 'package:maryams_school_fees/backup_page.dart';
+import 'package:maryams_school_fees/settings.dart';
 
 class SchoolsPage extends StatefulWidget {
   @override
@@ -58,6 +60,26 @@ class _SchoolsPageState extends State<SchoolsPage> {
               );
             },
             icon: Icon(Icons.app_registration), // Added an icon
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BackupPage(),
+                ),
+              );
+            },
+            icon: Icon(Icons.backup),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
+            icon: Icon(Icons.settings),
           ),
         ],
         elevation: 0,

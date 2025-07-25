@@ -180,23 +180,6 @@ class _AppState extends State<App> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => BackupPage(),
-                  ),
-                );
-              },
-              icon: Row(
-                children: [
-                  Text('النسخ الاحتياطي'),
-                  SizedBox(width: 4),
-                  Icon(Icons.backup),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
                       builder: (context) => StudentListPage(
                             school: widget.school,
                           )),
@@ -207,21 +190,6 @@ class _AppState extends State<App> {
                   Text('الطباعة'),
                   SizedBox(width: 4),
                   Icon(Icons.print),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsScreen()),
-                );
-              },
-              icon: Row(
-                children: [
-                  Text('الاعدادات'),
-                  SizedBox(width: 4),
-                  Icon(Icons.settings),
                 ],
               ),
             ),
