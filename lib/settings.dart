@@ -142,9 +142,225 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+            SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _showPromotionDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 15),
+              ),
+              child: Text(
+                'الترحيل للعام القادم',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _showPromotionDialog() async {
+    final TextEditingController passwordController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'تأكيد الترحيل للعام القادم',
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'تحذير: هذه العملية لا يمكن التراجع عنها!',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 15),
+              Text(
+                'سيتم تنفيذ العمليات التالية:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text('1. ترحيل جميع الطلاب للصفوف التالية'),
+              Text('2. حذف جميع الأقساط المدفوعة'),
+              Text('3. حذف جميع الرسوم الإضافية'),
+              SizedBox(height: 20),
+              Text(
+                'أدخل كلمة المرور للتأكيد:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'كلمة المرور',
+                  border: OutlineInputBorder(),
+                  hintText: 'أدخل كلمة المرور',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('إلغاء'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (passwordController.text == '1444944494') {
+                  Navigator.of(context).pop();
+                  await _performStudentPromotion();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('كلمة المرور غير صحيحة'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text('تأكيد الترحيل'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _performStudentPromotion() async {
+    try {
+      // إظهار مؤشر التحميل
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 20),
+                Text('جاري تنفيذ عملية الترحيل...'),
+              ],
+            ),
+          );
+        },
+      );
+
+      // 1. ترحيل الطلاب للصفوف التالية
+      await _promoteStudents();
+
+      // 2. حذف جميع الأقساط
+      await sqlDb.deleteData("DELETE FROM installments");
+
+      // 3. حذف جميع الرسوم الإضافية
+      await sqlDb.deleteData("DELETE FROM additionalFees");
+
+      Navigator.of(context).pop(); // إغلاق مؤشر التحميل
+
+      // إظهار رسالة النجاح
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              'تم الترحيل بنجاح',
+              style: TextStyle(color: Colors.green),
+            ),
+            content: Text(
+              'تم ترحيل جميع الطلاب للصفوف التالية وحذف جميع الأقساط والرسوم الإضافية.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('موافق'),
+              ),
+            ],
+          );
+        },
+      );
+
+    } catch (e) {
+      Navigator.of(context).pop(); // إغلاق مؤشر التحميل في حالة الخطأ
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('حدث خطأ أثناء عملية الترحيل: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _promoteStudents() async {
+    // خريطة الترحيل للصفوف
+    Map<String, Map<String, dynamic>> promotionMap = {
+      // المرحلة الابتدائية
+      'الأول الإبتدائي': {'newStage': 'الثاني الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
+      'الثاني الإبتدائي': {'newStage': 'الثالث الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
+      'الثالث الإبتدائي': {'newStage': 'الرابع الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
+      'الرابع الإبتدائي': {'newStage': 'الخامس الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
+      'الخامس الإبتدائي': {'newStage': 'السادس الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
+      'السادس الإبتدائي': {'newStage': 'الأول المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
+      
+      // المرحلة المتوسطة
+      'الأول المتوسط': {'newStage': 'الثاني المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
+      'الثاني المتوسط': {'newStage': 'الثالث المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
+      'الثالث المتوسط': {'newStage': 'الرابع', 'newLevel': 'إعدادي', 'newSchool': 3, 'newStream': 'العلمي'},
+      
+      // المرحلة الإعدادية
+      'الرابع': {'newStage': 'الخامس', 'newLevel': 'إعدادي', 'newSchool': 3},
+      'الخامس': {'newStage': 'السادس', 'newLevel': 'إعدادي', 'newSchool': 3},
+    };
+
+    // الحصول على جميع الطلاب
+    List<Map> students = await sqlDb.readData("SELECT * FROM students");
+
+    for (Map student in students) {
+      String currentStage = student['stage'];
+      
+      if (promotionMap.containsKey(currentStage)) {
+        Map<String, dynamic> promotion = promotionMap[currentStage]!;
+        
+        String updateQuery = '''
+          UPDATE students 
+          SET stage = '${promotion['newStage']}',
+              level = '${promotion['newLevel']}',
+              school = ${promotion['newSchool']}
+        ''';
+        
+        // إضافة Stream إذا كان مطلوباً
+        if (promotion.containsKey('newStream')) {
+          updateQuery += ", stream = '${promotion['newStream']}'";
+        }
+        
+        updateQuery += " WHERE id = ${student['id']}";
+        
+        await sqlDb.updateData(updateQuery);
+      } else if (currentStage == 'السادس') {
+        // الطلاب في السادس يتخرجون - يمكن حذفهم أو تركهم كما هم
+        // هنا سنتركهم كما هم
+        print('الطالب ${student['name']} في الصف السادس - متخرج');
+      }
+    }
   }
 }
