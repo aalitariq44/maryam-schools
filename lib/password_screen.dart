@@ -33,6 +33,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   Future<void> _loadPassword() async {
     List<Map> result = await sqlDb
         .readData("SELECT value FROM appSettings WHERE key = 'appPassword'");
+    if (!mounted) return; // Check if the widget is still mounted
     if (result.isNotEmpty) {
       setState(() {
         _storedPassword = result.first['value'];
@@ -47,6 +48,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   Future<void> _setPassword(String password) async {
     await sqlDb.insertData(
         "INSERT OR REPLACE INTO appSettings (key, value) VALUES ('appPassword', '$password')");
+    if (!mounted) return; // Check if the widget is still mounted
     setState(() {
       _storedPassword = password;
       _isSettingNewPassword = false;
