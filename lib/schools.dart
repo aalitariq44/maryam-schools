@@ -11,6 +11,7 @@ class SchoolsPage extends StatefulWidget {
 class _SchoolsPageState extends State<SchoolsPage> {
   SqlDb sqlDb = SqlDb();
   List<Map> schools = [];
+  int totalStudents = 0;
   bool isLoading = true;
 
   @override
@@ -21,8 +22,13 @@ class _SchoolsPageState extends State<SchoolsPage> {
 
   void getSchools() async {
     List<Map> response = await sqlDb.readData("SELECT * FROM schools");
+    int calculatedTotalStudents = 0;
+    for (var school in response) {
+      calculatedTotalStudents += (school['student_count'] as int);
+    }
     setState(() {
       schools = response;
+      totalStudents = calculatedTotalStudents;
       isLoading = false;
     });
   }
@@ -31,7 +37,16 @@ class _SchoolsPageState extends State<SchoolsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('المدارس', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('المدارس', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'إجمالي الطلاب: $totalStudents',
+              style: TextStyle(fontSize: 14, color: Colors.white70),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -109,6 +124,14 @@ class _SchoolsPageState extends State<SchoolsPage> {
                           SizedBox(height: 8),
                           Text(
                             'رقم المدرسة: ${schools[index]['id']}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'عدد الطلاب: ${schools[index]['student_count']}',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],

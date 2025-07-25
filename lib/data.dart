@@ -18,7 +18,7 @@ class SqlDb {
       Database myDb = await openDatabase(
         path,
         onCreate: _onCreate,
-        version: 10,
+        version: 11,
         onUpgrade: _onUpgrade,
       );
       return myDb;
@@ -141,6 +141,15 @@ class SqlDb {
 
       print("تم حذف عمود nameStudent من جدول installments");
     }
+
+    if (oldVersion < 11) {
+      await db.execute('ALTER TABLE schools ADD COLUMN student_count INTEGER NOT NULL DEFAULT 0');
+      await db.execute('''
+        UPDATE schools
+        SET student_count = (SELECT COUNT(*) FROM students WHERE students.school = schools.id)
+      ''');
+      print("تم إضافة عمود student_count إلى جدول schools وتحديثه");
+    }
     print("onUpgrade =====================================");
   }
 
@@ -196,16 +205,17 @@ class SqlDb {
       await db.execute('''
         CREATE TABLE "schools" (
           "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-          "name" TEXT NOT NULL
+          "name" TEXT NOT NULL,
+          "student_count" INTEGER NOT NULL DEFAULT 0
         )
       ''');
 
       await db
           .insert('appSettings', {'key': 'academicYear', 'value': '2024-2025'});
 
-      await db.insert('schools', {'name': 'ابتدائية مريم المختلطة'});
-      await db.insert('schools', {'name': 'ثانوية مريم للبنات'});
-      await db.insert('schools', {'name': 'ثانوية مريم للبنين'});
+      await db.insert('schools', {'name': 'ابتدائية مريم المختلطة', 'student_count': 0});
+      await db.insert('schools', {'name': 'ثانوية مريم للبنات', 'student_count': 0});
+      await db.insert('schools', {'name': 'ثانوية مريم للبنين', 'student_count': 0});
 
       print("onCreate =====================================");
     } catch (e) {
