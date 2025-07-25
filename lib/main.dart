@@ -82,7 +82,7 @@ Future<void> performAutoBackup() async {
 
     // Online backup
     final response = await Supabase.instance.client.storage
-        .from('database')
+        .from('maryam2025-2026')
         .upload('$backupFolderName/$backupFileName', sourceFile);
 
     if (response.isEmpty) {
