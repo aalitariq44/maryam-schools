@@ -46,7 +46,7 @@ class BackupPage extends StatelessWidget {
       final sourceFile = File(join(databasePath, 'maryam_schools.db'));
 
       final response = await Supabase.instance.client.storage
-          .from('database')
+          .from('maryam2025-2026')
           .upload('$backupFolderName/$backupFileName', sourceFile);
 
       Navigator.of(context).pop(); // إخفاء دائرة التحميل

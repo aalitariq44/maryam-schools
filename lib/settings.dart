@@ -315,21 +315,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // خريطة الترحيل للصفوف
     Map<String, Map<String, dynamic>> promotionMap = {
       // المرحلة الابتدائية
-      'الأول الإبتدائي': {'newStage': 'الثاني الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
-      'الثاني الإبتدائي': {'newStage': 'الثالث الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
-      'الثالث الإبتدائي': {'newStage': 'الرابع الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
-      'الرابع الإبتدائي': {'newStage': 'الخامس الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
-      'الخامس الإبتدائي': {'newStage': 'السادس الإبتدائي', 'newLevel': 'ابتدائي', 'newSchool': 1},
-      'السادس الإبتدائي': {'newStage': 'الأول المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
-      
-      // المرحلة المتوسطة
-      'الأول المتوسط': {'newStage': 'الثاني المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
-      'الثاني المتوسط': {'newStage': 'الثالث المتوسط', 'newLevel': 'متوسط', 'newSchool': 3},
-      'الثالث المتوسط': {'newStage': 'الرابع', 'newLevel': 'إعدادي', 'newSchool': 3, 'newStream': 'العلمي'},
-      
-      // المرحلة الإعدادية
-      'الرابع': {'newStage': 'الخامس', 'newLevel': 'إعدادي', 'newSchool': 3},
-      'الخامس': {'newStage': 'السادس', 'newLevel': 'إعدادي', 'newSchool': 3},
+      'الأول الإبتدائي': {'newStage': 'الثاني الإبتدائي'},
+      'الثاني الإبتدائي': {'newStage': 'الثالث الإبتدائي'},
+      'الثالث الإبتدائي': {'newStage': 'الرابع الإبتدائي'},
+      'الرابع الإبتدائي': {'newStage': 'الخامس الإبتدائي'},
+      'الخامس الإبتدائي': {'newStage': 'السادس الإبتدائي'},
+      // السادس الإبتدائي يحتاج تغيير المدرسة
+      'السادس الإبتدائي': {'newStage': 'الأول المتوسط', 'newLevel': 'متوسط', 'changeSchool': '3'},
+      // المرحلة المتوسطة (لا تغيير للمدرسة)
+      'الأول المتوسط': {'newStage': 'الثاني المتوسط'},
+      'الثاني المتوسط': {'newStage': 'الثالث المتوسط'},
+      'الثالث المتوسط': {'newStage': 'الرابع', 'newLevel': 'إعدادي', 'newStream': 'العلمي'},
+      // المرحلة الإعدادية (لا تغيير للمدرسة)
+      'الرابع': {'newStage': 'الخامس'},
+      'الخامس': {'newStage': 'السادس'},
     };
 
     // الحصول على جميع الطلاب
@@ -337,24 +336,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     for (Map student in students) {
       String currentStage = student['stage'];
-      
+      int currentSchool = int.tryParse(student['school']?.toString() ?? '') ?? 1;
       if (promotionMap.containsKey(currentStage)) {
         Map<String, dynamic> promotion = promotionMap[currentStage]!;
-        
         String updateQuery = '''
           UPDATE students 
-          SET stage = '${promotion['newStage']}',
-              level = '${promotion['newLevel']}',
-              school = ${promotion['newSchool']}
+          SET stage = '${promotion['newStage']}'
         ''';
-        
+        // أضف level فقط إذا كان موجوداً في الخريطة
+        if (promotion.containsKey('newLevel')) {
+          updateQuery += ", level = '${promotion['newLevel']}'";
+        }
+        // معالجة changeSchool لأي نوع
+        var changeSchool = promotion['changeSchool'];
+        bool shouldChangeSchool = false;
+        if (changeSchool != null) {
+          if (changeSchool is int && changeSchool == 3) {
+            shouldChangeSchool = true;
+          } else if (changeSchool is bool && changeSchool == true) {
+            shouldChangeSchool = true;
+          } else if (changeSchool is String && int.tryParse(changeSchool) == 3) {
+            shouldChangeSchool = true;
+          }
+        }
+        if (shouldChangeSchool) {
+          updateQuery += ", school = 3";
+        } else {
+          updateQuery += ", school = $currentSchool";
+        }
         // إضافة Stream إذا كان مطلوباً
         if (promotion.containsKey('newStream')) {
           updateQuery += ", stream = '${promotion['newStream']}'";
         }
-        
         updateQuery += " WHERE id = ${student['id']}";
-        
         await sqlDb.updateData(updateQuery);
       } else if (currentStage == 'السادس') {
         // الطلاب في السادس يتخرجون - يمكن حذفهم أو تركهم كما هم
