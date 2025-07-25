@@ -315,20 +315,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // خريطة الترحيل للصفوف
     Map<String, Map<String, dynamic>> promotionMap = {
       // المرحلة الابتدائية
-      'الأول الإبتدائي': {'newStage': 'الثاني الإبتدائي'},
-      'الثاني الإبتدائي': {'newStage': 'الثالث الإبتدائي'},
-      'الثالث الإبتدائي': {'newStage': 'الرابع الإبتدائي'},
-      'الرابع الإبتدائي': {'newStage': 'الخامس الإبتدائي'},
-      'الخامس الإبتدائي': {'newStage': 'السادس الإبتدائي'},
+      'الأول الإبتدائي': {'newStage': 'الثاني الإبتدائي', 'newTotalInstallment': 500000},
+      'الثاني الإبتدائي': {'newStage': 'الثالث الإبتدائي', 'newTotalInstallment': 500000},
+      'الثالث الإبتدائي': {'newStage': 'الرابع الإبتدائي', 'newTotalInstallment': 600000},
+      'الرابع الإبتدائي': {'newStage': 'الخامس الإبتدائي', 'newTotalInstallment': 600000},
+      'الخامس الإبتدائي': {'newStage': 'السادس الإبتدائي', 'newTotalInstallment': 600000},
       // السادس الإبتدائي يحتاج تغيير المدرسة
-      'السادس الإبتدائي': {'newStage': 'الأول المتوسط', 'newLevel': 'متوسط', 'changeSchool': '3'},
+      'السادس الإبتدائي': {'newStage': 'الأول المتوسط', 'newLevel': 'متوسط', 'changeSchool': '3', 'newTotalInstallment': 800000},
       // المرحلة المتوسطة (لا تغيير للمدرسة)
-      'الأول المتوسط': {'newStage': 'الثاني المتوسط'},
-      'الثاني المتوسط': {'newStage': 'الثالث المتوسط'},
-      'الثالث المتوسط': {'newStage': 'الرابع', 'newLevel': 'إعدادي', 'newStream': 'العلمي'},
+      'الأول المتوسط': {'newStage': 'الثاني المتوسط', 'newTotalInstallment': 850000},
+      'الثاني المتوسط': {'newStage': 'الثالث المتوسط', 'newTotalInstallment': 900000},
+      'الثالث المتوسط': {'newStage': 'الرابع', 'newLevel': 'إعدادي', 'newStream': 'العلمي', 'newTotalInstallment': 1000000},
       // المرحلة الإعدادية (لا تغيير للمدرسة)
-      'الرابع': {'newStage': 'الخامس'},
-      'الخامس': {'newStage': 'السادس'},
+      'الرابع': {'newStage': 'الخامس', 'newTotalInstallment': 1250000},
+      'الخامس': {'newStage': 'السادس', 'newTotalInstallment': 1500000},
     };
 
     // الحصول على جميع الطلاب
@@ -367,6 +367,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         // إضافة Stream إذا كان مطلوباً
         if (promotion.containsKey('newStream')) {
           updateQuery += ", stream = '${promotion['newStream']}'";
+        }
+        // إضافة تحديث القسط الكلي
+        if (promotion.containsKey('newTotalInstallment')) {
+          updateQuery += ", totalInstallment = ${promotion['newTotalInstallment']}";
         }
         updateQuery += " WHERE id = ${student['id']}";
         await sqlDb.updateData(updateQuery);

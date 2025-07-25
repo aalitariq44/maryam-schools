@@ -95,7 +95,7 @@ class _AddStudentState extends State<AddStudent> {
         totalController.text = '600000';
         break;
       case 'الأول المتوسط':
-        totalController.text = '750000';
+        totalController.text = '800000';
         break;
       case 'الثاني المتوسط':
         totalController.text = '850000';
@@ -104,7 +104,7 @@ class _AddStudentState extends State<AddStudent> {
         totalController.text = '900000';
         break;
       case 'الرابع':
-        totalController.text = '1100000';
+        totalController.text = '1000000';
         break;
       case 'الخامس':
         totalController.text = '1250000';

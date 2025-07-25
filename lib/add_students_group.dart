@@ -244,13 +244,13 @@ class StudentFormField extends StatelessWidget {
         studentField.totalController.text = '600000';
         break;
       case 'السادس الإبتدائي':
-        studentField.totalController.text = '650000';
+        studentField.totalController.text = '600000';
         break;
       case 'الأول المتوسط':
-        studentField.totalController.text = '700000';
+        studentField.totalController.text = '800000';
         break;
       case 'الثاني المتوسط':
-        studentField.totalController.text = '800000';
+        studentField.totalController.text = '850000';
         break;
       case 'الثالث المتوسط':
         studentField.totalController.text = '900000';
@@ -259,10 +259,10 @@ class StudentFormField extends StatelessWidget {
         studentField.totalController.text = '1000000';
         break;
       case 'الخامس':
-        studentField.totalController.text = '1100000';
+        studentField.totalController.text = '1250000';
         break;
       case 'السادس':
-        studentField.totalController.text = '1250000';
+        studentField.totalController.text = '1500000';
         break;
     }
   }
